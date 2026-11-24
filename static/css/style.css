@@ -498,3 +498,140 @@ a {
         width: 100%;
     }
 }
+
+
+
+/* Страница отдельного тура */
+
+.detail-page {
+    padding: 55px 7% 110px;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 35px;
+    color: var(--green-light);
+    font-size: 13px;
+}
+
+.detail-layout {
+    display: grid;
+    grid-template-columns: 1.7fr 1fr;
+    gap: 55px;
+    align-items: start;
+}
+
+.detail-image {
+    display: block;
+    width: 100%;
+    height: 420px;
+    object-fit: cover;
+    margin-bottom: 35px;
+}
+
+.detail-main h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(40px, 5vw, 65px);
+    font-weight: 400;
+    margin: 18px 0 25px;
+}
+
+.detail-description {
+    color: #667269;
+    font-size: 15px;
+    line-height: 1.9;
+    margin-bottom: 40px;
+}
+
+.detail-main h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 400;
+    margin-bottom: 25px;
+}
+
+.detail-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.detail-features p {
+    padding: 15px 20px;
+    background: var(--sand);
+    font-size: 13px;
+}
+
+.booking-panel {
+    background: white;
+    padding: 35px;
+    border: 1px solid #E8E2D9;
+}
+
+.price-label {
+    margin-top: 30px;
+    color: #788078;
+    font-size: 13px;
+}
+
+.detail-price {
+    margin-top: 10px;
+    font-size: 37px;
+    font-weight: 700;
+}
+
+.price-note {
+    color: #788078;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.booking-panel h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 25px;
+    font-weight: 400;
+    margin: 35px 0 20px;
+}
+
+.available-dates {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.date-option {
+    padding: 18px;
+    border: 1px solid #E5E0D7;
+}
+
+.date-option strong {
+    font-size: 14px;
+}
+
+.date-option span {
+    font-size: 13px;
+    color: #788078;
+}
+
+.date-option small {
+    display: block;
+    margin-top: 8px;
+    color: var(--green-light);
+}
+
+.booking-hint {
+    margin-top: 22px;
+    color: #788078;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+@media (max-width: 850px) {
+    .detail-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .detail-image {
+        height: 300px;
+    }
+}

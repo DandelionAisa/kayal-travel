@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>{{ tour.title }} — Каял</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header class="catalog-header">
+    <a href="/" class="logo">КАЯЛ</a>
+
+    <nav class="navigation">
+        <a href="/">Главная</a>
+        <a href="/tours">Каталог туров</a>
+    </nav>
+</header>
+
+<main class="detail-page">
+
+    <a href="/tours" class="back-link">
+        ← Все путешествия
+    </a>
+
+    <div class="detail-layout">
+
+        <div class="detail-main">
+
+            <img
+                class="detail-image"
+                src="{{ url_for('static',
+                    filename='images/' + tour.image) }}"
+                alt="{{ tour.title }}"
+            >
+
+            <span class="section-subtitle">
+                {{ tour.category }}
+            </span>
+
+            <h1>{{ tour.title }}</h1>
+
+            <p class="detail-description">
+                {{ tour.description }}
+            </p>
+
+            <h2>О путешествии</h2>
+
+            <div class="detail-features">
+                <p>📍 {{ tour.location }}</p>
+                <p>🕒 {{ tour.duration_days }} дн.</p>
+                <p>👥 До {{ tour.max_participants }} человек</p>
+            </div>
+
+        </div>
+
+        <aside class="booking-panel">
+
+            <span class="section-subtitle">
+                ВАШЕ ПУТЕШЕСТВИЕ
+            </span>
+
+            <p class="price-label">Стоимость от</p>
+
+            <div class="detail-price">
+                {{ "{:,.0f}".format(tour.price).replace(",", " ") }} ₽
+            </div>
+
+            <p class="price-note">за одного человека</p>
+
+            <h3>Доступные даты</h3>
+
+            {% if dates %}
+
+                <div class="available-dates">
+                    {% for date in dates %}
+
+                    <div class="date-option">
+                        <div>
+                            <strong>
+                                {{ date.start_date.strftime('%d.%m.%Y') }}
+                            </strong>
+
+                            <span>
+                                —
+                                {{ date.end_date.strftime('%d.%m.%Y') }}
+                            </span>
+                        </div>
+
+                        <small>
+                            Свободных мест: {{ date.available_places }}
+                        </small>
+                    </div>
+
+                    {% endfor %}
+                </div>
+
+                <p class="booking-hint">
+                    Бронирование будет доступно
+                    после подключения личного кабинета.
+                </p>
+
+            {% else %}
+
+                <p class="booking-hint">
+                    Пока нет доступных дат поездки.
+                </p>
+
+            {% endif %}
+
+        </aside>
+    </div>
+
+</main>
+
+</body>
+</html>

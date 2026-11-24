@@ -91,9 +91,9 @@
                         {{ "{:,.0f}".format(tour.price).replace(",", " ") }} ₽
                     </strong>
 
-                    <span class="tour-link">
+                    <a href="{{ url_for('tour_detail', tour_id=tour.id) }}" class="tour-link">
                         Подробнее →
-                    </span>
+                    </a>
                 </div>
             </div>
         </article>

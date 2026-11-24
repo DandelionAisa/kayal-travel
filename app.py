@@ -2,7 +2,7 @@
 import os
 
 import pymysql
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, abort
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -80,6 +80,61 @@ def tours():
         "tours.html",
         tours=all_tours
     )
+
+
+@app.route("/tours/<int:tour_id>")
+def tour_detail(tour_id):
+    connection = get_db_connection()
+
+    try:
+        with connection.cursor() as cursor:
+            # Получаем информацию о туре
+            cursor.execute("""
+                SELECT
+                    t.id,
+                    t.title,
+                    t.description,
+                    t.location,
+                    t.duration_days,
+                    t.price,
+                    t.max_participants,
+                    t.image,
+                    c.name AS category
+                FROM tours t
+                JOIN categories c ON t.category_id = c.id
+                WHERE t.id = %s AND t.is_active = TRUE
+            """, (tour_id,))
+
+            tour = cursor.fetchone()
+
+            if tour is None:
+                abort(404)
+
+            # Получаем доступные даты поездки
+            cursor.execute("""
+                SELECT
+                    id,
+                    start_date,
+                    end_date,
+                    available_places
+                FROM tour_dates
+                WHERE tour_id = %s
+                  AND start_date >= CURDATE()
+                  AND available_places > 0
+                ORDER BY start_date
+            """, (tour_id,))
+
+            dates = cursor.fetchall()
+
+    finally:
+        connection.close()
+
+    return render_template(
+        "tour_detail.html",
+        tour=tour,
+        dates=dates
+    )
+
 
 if __name__ == "__main__":
     app.run(debug=True)
