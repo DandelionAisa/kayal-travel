@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>Каталог туров — Каял</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header class="catalog-header">
+    <a href="/" class="logo">КАЯЛ</a>
+    <nav class="navigation">
+        <a href="/">Главная</a>
+        <a href="/tours">Туры</a>
+    </nav>
+</header>
+
+<main class="catalog-page">
+    <span class="section-subtitle">
+        ОТКРОЙ КАРЕЛИЮ
+    </span>
+
+    <h1>Наши путешествия</h1>
+
+    <p class="catalog-description">
+        Выбери своё приключение среди северных лесов,
+        озёр и живописных маршрутов Карелии.
+    </p>
+
+
+    <form method="GET" action="/tours" class="tour-filters">
+
+        <select name="category">
+            <option value="">Все направления</option>
+            <option value="1">Природные достопримечательности</option>
+            <option value="2">Активные приключения</option>
+            <option value="3">Отдых у озера</option>
+        </select>
+
+        <select name="max_price">
+            <option value="">Любая стоимость</option>
+            <option value="5000">До 5 000 ₽</option>
+            <option value="10000">До 10 000 ₽</option>
+            <option value="15000">До 15 000 ₽</option>
+        </select>
+
+        <select name="duration">
+            <option value="">Любая длительность</option>
+            <option value="1">1 день</option>
+            <option value="2">2 дня</option>
+            <option value="3">3 дня</option>
+        </select>
+
+        <button type="submit">Найти тур</button>
+        <a href="/tours" class="reset-filters">Сбросить</a>
+
+    </form>
+
+
+    <div class="tours-grid">
+
+        {% for tour in tours %}
+
+        <article class="tour-card">
+            <img
+                src="{{ url_for('static',
+                    filename='images/' + tour.image) }}"
+                alt="{{ tour.title }}"
+            >
+
+            <div class="tour-info">
+                <span class="tour-category">
+                    {{ tour.category }}
+                </span>
+
+                <h2>{{ tour.title }}</h2>
+
+                <p>{{ tour.description }}</p>
+
+                <div class="tour-details">
+                    <span>{{ tour.duration_days }} дн.</span>
+                    <span>{{ tour.location }}</span>
+                </div>
+
+                <div class="tour-bottom">
+                    <strong>
+                        {{ "{:,.0f}".format(tour.price).replace(",", " ") }} ₽
+                    </strong>
+
+                    <span class="tour-link">
+                        Подробнее →
+                    </span>
+                </div>
+            </div>
+        </article>
+
+        {% endfor %}
+
+    </div>
+</main>
+
+</body>
+</html>
