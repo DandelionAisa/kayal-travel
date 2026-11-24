@@ -1,0 +1,89 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каял — путешествия по Карелии</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <header class="header">
+        <a href="/" class="logo">КАЯЛ</a>
+
+        <nav class="navigation">
+            <a href="#destinations">Направления</a>
+            <a href="#about">О нас</a>
+            <a href="#contacts">Контакты</a>
+        </nav>
+
+        <a href="#destinations" class="header-button">Выбрать тур</a>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <span class="hero-subtitle">
+                    ПУТЕШЕСТВИЯ ПО КАРЕЛИИ
+                </span>
+
+                <h1>Открой свою<br>Карелию</h1>
+
+                <p>
+                    Живописные озёра, бескрайние леса
+                    и путешествия, которые остаются в памяти.
+                </p>
+
+                <a href="#destinations" class="hero-button">
+                    Открыть направления
+                </a>
+            </div>
+        </section>
+
+        <section id="destinations" class="destinations">
+            <span class="section-subtitle">ИССЛЕДУЙ КАРЕЛИЮ</span>
+            <h2>Путешествия на любой вкус</h2>
+
+            <p class="section-description">
+                От спокойного отдыха у озера до приключений
+                среди северной природы.
+            </p>
+
+            <div class="destination-grid">
+                <article class="destination-card">
+                    <h3>Природные достопримечательности</h3>
+                    <p>Красота Карелии в каждом маршруте</p>
+                </article>
+
+                <article class="destination-card">
+                    <h3>Активные приключения</h3>
+                    <p>Походы и сплавы по карельским рекам</p>
+                </article>
+
+                <article class="destination-card">
+                    <h3>Отдых у озера</h3>
+                    <p>Тишина, уют и единение с природой</p>
+                </article>
+            </div>
+        </section>
+
+        <section id="about" class="about">
+            <span class="section-subtitle">О КОМПАНИИ</span>
+            <h2>Карелия ближе, чем кажется</h2>
+            <p>
+                «Каял» — путешествия для тех, кто хочет
+                увидеть настоящую красоту северной природы.
+            </p>
+        </section>
+    </main>
+
+    <footer id="contacts" class="footer">
+        <h2>КАЯЛ</h2>
+        <p>Путешествия по Карелии</p>
+        <span>© 2026 Каял. Курсовой проект.</span>
+    </footer>
+
+</body>
+</html>

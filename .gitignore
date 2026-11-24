@@ -1,0 +1,19 @@
+# Виртуальное окружение
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Секретные данные
+.env
+.env.*
+!.env.example
+
+# Настройки VS Code
+.vscode/
+
+# Временные файлы
+*.log
