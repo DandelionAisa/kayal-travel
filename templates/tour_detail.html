@@ -75,48 +75,92 @@
 
             <h3>Доступные даты</h3>
 
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                    <div class="auth-alert {{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endwith %}
+
             {% if dates %}
 
-                <div class="available-dates">
+            <form action="{{ url_for('book_tour', tour_id=tour.id) }}"
+                method="POST"
+                class="booking-form">
+
+                <input type="hidden"
+                    name="csrf_token"
+                    value="{{ csrf_token() }}">
+
+                <label for="tour_date_id">Дата путешествия</label>
+
+                <select id="tour_date_id"
+                        name="tour_date_id"
+                        required>
+
+                    <option value="">Выберите дату</option>
+
                     {% for date in dates %}
-
-                    <div class="date-option">
-                        <div>
-                            <strong>
-                                {{ date.start_date.strftime('%d.%m.%Y') }}
-                            </strong>
-
-                            <span>
-                                —
-                                {{ date.end_date.strftime('%d.%m.%Y') }}
-                            </span>
-                        </div>
-
-                        <small>
-                            Свободных мест: {{ date.available_places }}
-                        </small>
-                    </div>
-
+                    <option value="{{ date.id }}"
+                            data-places="{{ date.available_places }}">
+                        {{ date.start_date.strftime('%d.%m.%Y') }}
+                        —
+                        {{ date.end_date.strftime('%d.%m.%Y') }}
+                        (мест: {{ date.available_places }})
+                    </option>
                     {% endfor %}
+
+                </select>
+
+                <label for="participants">Количество участников</label>
+
+                <input type="number"
+                    id="participants"
+                    name="participants"
+                    min="1"
+                    max="{{ tour.max_participants }}"
+                    value="1"
+                    required>
+
+                <p class="booking-availability" id="booking-availability"></p>
+
+                <div class="booking-total">
+                    <span>Итого</span>
+                    <strong id="booking-total"
+                            data-price="{{ tour.price }}">
+                        {{ "{:,.0f}".format(tour.price).replace(",", " ") }} ₽
+                    </strong>
                 </div>
 
-                <p class="booking-hint">
-                    Бронирование будет доступно
-                    после подключения личного кабинета.
-                </p>
+                {% if g.user %}
+                    <button type="submit" class="booking-submit">
+                        Забронировать
+                    </button>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="booking-submit">
+                        Войти для бронирования
+                    </a>
+                {% endif %}
+
+            </form>
 
             {% else %}
 
-                <p class="booking-hint">
-                    Пока нет доступных дат поездки.
-                </p>
+            <p class="booking-hint">
+                Пока нет доступных дат поездки.
+            </p>
 
             {% endif %}
+
 
         </aside>
     </div>
 
 </main>
+
+<script src="{{ url_for('static', filename='js/booking.js') }}"></script>
 
 </body>
 </html>

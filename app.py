@@ -6,7 +6,7 @@ import pymysql
 from dotenv import load_dotenv
 from flask import (
     Flask, render_template, request, abort,
-    redirect, url_for, session, flash, g
+    redirect, url_for, session, flash, g, jsonify
 )
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -320,6 +320,94 @@ def profile():
         user=g.user,
         bookings=bookings
     )
+
+
+@app.route("/book/<int:tour_id>", methods=["POST"])
+@login_required
+def book_tour(tour_id):
+    tour_date_id = request.form.get("tour_date_id", type=int)
+    participants = request.form.get("participants", type=int)
+
+    if not tour_date_id or not participants or participants < 1:
+        flash("Выберите дату и количество участников.", "error")
+        return redirect(url_for("tour_detail", tour_id=tour_id))
+
+    connection = get_db_connection()
+
+    try:
+        connection.begin()
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT
+                    td.id,
+                    td.available_places,
+                    td.start_date,
+                    t.id AS tour_id,
+                    t.price,
+                    t.max_participants
+                FROM tour_dates td
+                JOIN tours t ON td.tour_id = t.id
+                WHERE td.id = %s
+                  AND t.id = %s
+                  AND t.is_active = TRUE
+                FOR UPDATE
+            """, (tour_date_id, tour_id))
+
+            selected_date = cursor.fetchone()
+
+            if not selected_date:
+                connection.rollback()
+                flash("Выбранная дата недоступна.", "error")
+                return redirect(url_for("tour_detail", tour_id=tour_id))
+
+            if selected_date["start_date"] < __import__("datetime").date.today():
+                connection.rollback()
+                flash("Нельзя забронировать прошедшую дату.", "error")
+                return redirect(url_for("tour_detail", tour_id=tour_id))
+
+            if participants > selected_date["available_places"]:
+                connection.rollback()
+                flash("Недостаточно свободных мест.", "error")
+                return redirect(url_for("tour_detail", tour_id=tour_id))
+
+            if participants > selected_date["max_participants"]:
+                connection.rollback()
+                flash("Превышено максимальное число участников.", "error")
+                return redirect(url_for("tour_detail", tour_id=tour_id))
+
+            total_price = selected_date["price"] * participants
+
+            cursor.execute("""
+                INSERT INTO bookings
+                    (user_id, tour_date_id, participants, total_price, status)
+                VALUES (%s, %s, %s, %s, 'pending')
+            """, (
+                g.user["id"],
+                tour_date_id,
+                participants,
+                total_price
+            ))
+
+            cursor.execute("""
+                UPDATE tour_dates
+                SET available_places = available_places - %s
+                WHERE id = %s
+            """, (participants, tour_date_id))
+
+        connection.commit()
+
+        flash("Бронирование успешно оформлено!", "success")
+        return redirect(url_for("profile"))
+
+    except Exception:
+        connection.rollback()
+        app.logger.exception("Ошибка при бронировании тура")
+        flash("Не удалось оформить бронирование. Попробуйте позже.", "error")
+        return redirect(url_for("tour_detail", tour_id=tour_id))
+
+    finally:
+        connection.close()
 
 
 if __name__ == "__main__":
