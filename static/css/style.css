@@ -635,3 +635,209 @@ a {
         height: 300px;
     }
 }
+
+
+/* Регистрация и авторизация */
+
+.auth-body {
+    min-height: 100vh;
+    background: var(--cream);
+}
+
+.auth-page {
+    min-height: calc(100vh - 100px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 55px 20px;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 490px;
+    padding: 48px;
+    background: #FFFFFF;
+    border: 1px solid #E8E2D9;
+}
+
+.auth-card h1,
+.profile-page h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 400;
+    font-size: clamp(36px, 4vw, 50px);
+    margin: 15px 0;
+}
+
+.auth-subtitle {
+    font-size: 13px;
+    color: #788078;
+    margin-bottom: 30px;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.auth-form label {
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 12px;
+}
+
+.auth-form input {
+    padding: 15px;
+    border: 1px solid #DDD8CF;
+    outline: none;
+    font-family: 'Manrope', sans-serif;
+    font-size: 13px;
+    width: 100%;
+}
+
+.auth-form input:focus {
+    border-color: var(--green-light);
+}
+
+.auth-form button,
+.profile-action {
+    display: inline-block;
+    padding: 17px;
+    margin-top: 24px;
+    background: var(--green);
+    border: none;
+    color: white;
+    text-align: center;
+    font-family: 'Manrope', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.auth-form button:hover,
+.profile-action:hover {
+    background: var(--green-light);
+}
+
+.auth-switch {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 12px;
+    color: #788078;
+}
+
+.auth-switch a {
+    color: var(--green);
+    font-weight: 700;
+}
+
+.auth-alert {
+    margin: 15px 0;
+    padding: 13px 16px;
+    font-size: 13px;
+    background: #F2E6DE;
+    color: #794C36;
+}
+
+.auth-alert.success {
+    background: #E1EDE2;
+    color: #315B3A;
+}
+
+/* Личный кабинет */
+
+.profile-page {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 75px 6% 110px;
+}
+
+.profile-card {
+    background: white;
+    padding: 35px;
+    margin: 35px 0 50px;
+    border: 1px solid #E8E2D9;
+}
+
+.profile-card h2,
+.profile-heading {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px;
+    font-weight: 400;
+    margin-bottom: 15px;
+}
+
+.profile-card p {
+    color: #667269;
+    font-size: 14px;
+    line-height: 1.9;
+}
+
+.profile-empty {
+    padding: 45px;
+    background: white;
+    text-align: center;
+    border: 1px solid #E8E2D9;
+}
+
+.profile-empty h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 25px;
+    font-weight: 400;
+}
+
+.profile-empty p {
+    margin-top: 15px;
+    color: #788078;
+    font-size: 13px;
+}
+
+.profile-action {
+    margin-top: 25px;
+}
+
+.profile-bookings {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.profile-booking {
+    padding: 28px;
+    background: white;
+    border: 1px solid #E8E2D9;
+}
+
+.profile-booking h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 25px;
+    margin-bottom: 15px;
+}
+
+.profile-booking p {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #667269;
+}
+
+.logout-button {
+    padding: 11px 20px;
+    color: white;
+    background: transparent;
+    border: 1px solid #FFFFFF80;
+    cursor: pointer;
+}
+
+@media (max-width: 650px) {
+    .auth-card {
+        padding: 30px 24px;
+    }
+
+    .profile-bookings {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-empty {
+        padding: 30px 20px;
+    }
+}

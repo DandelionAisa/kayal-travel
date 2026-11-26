@@ -1,0 +1,56 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Вход — Каял</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="auth-body">
+    <header class="catalog-header">
+        <a href="/" class="logo">КАЯЛ</a>
+        <a href="/tours">Наши путешествия</a>
+    </header>
+
+    <main class="auth-page">
+        <div class="auth-card">
+            <span class="section-subtitle">С ВОЗВРАЩЕНИЕМ</span>
+            <h1>Вход в аккаунт</h1>
+            <p class="auth-subtitle">
+                Ваши путешествия начинаются здесь.
+            </p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                    <div class="auth-alert {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endwith %}
+
+            <form method="POST" class="auth-form">
+                <input type="hidden" name="csrf_token"
+                       value="{{ csrf_token() }}">
+
+                <label for="email">Электронная почта</label>
+                <input type="email" id="email" name="email"
+                       maxlength="150" required
+                       placeholder="fio@mail.ru">
+
+                <label for="password">Пароль</label>
+                <input type="password" id="password"
+                       name="password" required
+                       placeholder="Ваш пароль">
+
+                <button type="submit">Войти</button>
+            </form>
+
+            <p class="auth-switch">
+                Нет аккаунта?
+                <a href="{{ url_for('register') }}">Регистрация</a>
+            </p>
+        </div>
+    </main>
+</body>
+</html>
+  
