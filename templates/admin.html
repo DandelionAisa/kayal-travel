@@ -26,6 +26,12 @@
             компании «Каял».
         </p>
 
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="auth-alert {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
         <section class="admin-section">
             <h2>Бронирования клиентов</h2>
 
@@ -114,6 +120,11 @@
         <section class="admin-section">
             <h2>Управление турами</h2>
 
+            <a href="{{ url_for('admin_create_tour') }}"
+                class="admin-create-button">
+                + Добавить путешествие
+            </a>
+
             <div class="admin-table-wrap">
                 <table class="admin-table">
                     <thead>
@@ -135,10 +146,29 @@
                             <td>
                                 {{ 'Активен' if tour.is_active else 'Скрыт' }}
                             </td>
+
+                        
+                            <td>
+                                <a class="admin-btn edit"
+                                href="{{ url_for('admin_edit_tour', tour_id=tour.id) }}">
+                                    Редактировать
+                                </a>
+
+                                <form method="POST"
+                                    action="{{ url_for('admin_toggle_tour', tour_id=tour.id) }}">
+                                    <input type="hidden" name="csrf_token"
+                                        value="{{ csrf_token() }}">
+
+                                    <button type="submit" class="admin-btn cancel">
+                                        {{ 'Скрыть' if tour.is_active else 'Показать' }}
+                                    </button>
+                                </form>
+                            </td>
+
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="5">Туры отсутствуют</td>
+                            <td colspan="6">Туры отсутствуют</td>
                         </tr>
                         {% endfor %}
                     </tbody>

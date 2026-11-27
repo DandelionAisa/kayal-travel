@@ -11,6 +11,10 @@ from flask import (
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.security import generate_password_hash, check_password_hash
 
+from datetime import date
+from decimal import Decimal, InvalidOperation
+from werkzeug.utils import secure_filename
+
 load_dotenv()
 
 app = Flask(__name__)
@@ -557,6 +561,246 @@ def update_booking(booking_id, action):
         connection.close()
 
     return redirect(url_for("admin_dashboard"))
+
+
+# Проверка данных формы тура
+def read_tour_form():
+    try:
+        category_id = int(request.form.get("category_id", ""))
+        duration = int(request.form.get("duration_days", ""))
+        max_people = int(request.form.get("max_participants", ""))
+        price = Decimal(request.form.get("price", ""))
+    except (ValueError, InvalidOperation):
+        raise ValueError("Проверьте цену, категорию и количество участников.")
+
+    title = request.form.get("title", "").strip()
+    description = request.form.get("description", "").strip()
+    location = request.form.get("location", "").strip()
+    image = request.form.get("image", "").strip()
+
+    if not title or not description or not location:
+        raise ValueError("Заполните обязательные поля.")
+
+    if len(title) > 150 or len(location) > 150:
+        raise ValueError("Название или местоположение слишком длинное.")
+
+    if duration < 1 or max_people < 1 or price < 0:
+        raise ValueError("Длительность и число участников должны быть больше нуля.")
+
+    if price > Decimal("99999999.99") or price.as_tuple().exponent < -2:
+        raise ValueError("Укажите корректную цену с точностью до копеек.")
+
+    if image:
+        if image != secure_filename(image) or len(image) > 255:
+            raise ValueError("Укажите допустимое имя файла изображения.")
+        if not image.lower().endswith((".jpg", ".jpeg", ".png", ".webp")):
+            raise ValueError("Фотография должна быть JPG, PNG или WebP.")
+        image_path = os.path.join(app.static_folder, "images", image)
+        if not os.path.isfile(image_path):
+            raise ValueError("Такой фотографии нет в static/images.")
+
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT id FROM categories WHERE id = %s",
+                (category_id,)
+            )
+            if cursor.fetchone() is None:
+                raise ValueError("Выберите существующую категорию.")
+    finally:
+        connection.close()
+
+    return (
+        category_id, title, description, location,
+        duration, price, max_people, image or None
+    )
+
+
+# Создание тура
+@app.route("/admin/tours/create", methods=["GET", "POST"])
+@admin_required
+def admin_create_tour():
+    connection = get_db_connection()
+
+    try:
+        if request.method == "POST":
+            try:
+                data = read_tour_form()
+
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        INSERT INTO tours
+                        (category_id, title, description, location,
+                         duration_days, price, max_participants, image)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    """, data)
+
+                connection.commit()
+                flash("Тур успешно создан.", "success")
+                return redirect(url_for("admin_dashboard"))
+
+            except ValueError as error:
+                flash(str(error), "error")
+
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT id, name FROM categories ORDER BY id")
+            categories = cursor.fetchall()
+
+    finally:
+        connection.close()
+
+    return render_template(
+        "admin_tour_form.html",
+        tour=None,
+        categories=categories,
+        dates=[]
+    )
+
+
+# Редактирование тура
+@app.route("/admin/tours/<int:tour_id>/edit", methods=["GET", "POST"])
+@admin_required
+def admin_edit_tour(tour_id):
+    connection = get_db_connection()
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT * FROM tours WHERE id = %s",
+                (tour_id,)
+            )
+            tour = cursor.fetchone()
+
+        if tour is None:
+            abort(404)
+
+        if request.method == "POST":
+            try:
+                data = read_tour_form()
+
+                with connection.cursor() as cursor:
+                    cursor.execute("""
+                        UPDATE tours
+                        SET category_id = %s,
+                            title = %s,
+                            description = %s,
+                            location = %s,
+                            duration_days = %s,
+                            price = %s,
+                            max_participants = %s,
+                            image = %s
+                        WHERE id = %s
+                    """, data + (tour_id,))
+
+                connection.commit()
+                flash("Изменения сохранены.", "success")
+                return redirect(url_for("admin_dashboard"))
+
+            except ValueError as error:
+                flash(str(error), "error")
+
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT id, name FROM categories ORDER BY id")
+            categories = cursor.fetchall()
+
+            cursor.execute("""
+                SELECT id, start_date, end_date, available_places
+                FROM tour_dates
+                WHERE tour_id = %s
+                ORDER BY start_date
+            """, (tour_id,))
+            dates = cursor.fetchall()
+
+    finally:
+        connection.close()
+
+    return render_template(
+        "admin_tour_form.html",
+        tour=tour,
+        categories=categories,
+        dates=dates
+    )
+
+
+# Скрытие и восстановление тура
+@app.route("/admin/tours/<int:tour_id>/toggle", methods=["POST"])
+@admin_required
+def admin_toggle_tour(tour_id):
+    connection = get_db_connection()
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                UPDATE tours
+                SET is_active = NOT is_active
+                WHERE id = %s
+            """, (tour_id,))
+
+            if cursor.rowcount == 0:
+                connection.rollback()
+                abort(404)
+
+        connection.commit()
+        flash("Статус тура изменён.", "success")
+
+    finally:
+        connection.close()
+
+    return redirect(url_for("admin_dashboard"))
+
+
+# Добавление доступной даты тура
+@app.route("/admin/tours/<int:tour_id>/dates", methods=["POST"])
+@admin_required
+def admin_add_tour_date(tour_id):
+    try:
+        start = date.fromisoformat(request.form.get("start_date", ""))
+        end = date.fromisoformat(request.form.get("end_date", ""))
+        places = int(request.form.get("available_places", ""))
+    except (ValueError, TypeError):
+        flash("Проверьте даты и количество мест.", "error")
+        return redirect(url_for("admin_edit_tour", tour_id=tour_id))
+
+    if start < date.today() or end < start or places < 1:
+        flash("Укажите будущие даты и положительное количество мест.", "error")
+        return redirect(url_for("admin_edit_tour", tour_id=tour_id))
+
+    connection = get_db_connection()
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT max_participants FROM tours WHERE id = %s",
+                (tour_id,)
+            )
+            tour = cursor.fetchone()
+
+            if tour is None:
+                abort(404)
+
+            if places > tour["max_participants"]:
+                flash("Мест больше, чем вместимость тура.", "error")
+                return redirect(url_for("admin_edit_tour", tour_id=tour_id))
+
+            try:
+                cursor.execute("""
+                    INSERT INTO tour_dates
+                    (tour_id, start_date, end_date, available_places)
+                    VALUES (%s, %s, %s, %s)
+                """, (tour_id, start, end, places))
+                connection.commit()
+                flash("Дата поездки добавлена.", "success")
+
+            except pymysql.err.IntegrityError:
+                connection.rollback()
+                flash("Такая дата уже есть у этого тура.", "error")
+
+    finally:
+        connection.close()
+
+    return redirect(url_for("admin_edit_tour", tour_id=tour_id))
+
 
 
 if __name__ == "__main__":

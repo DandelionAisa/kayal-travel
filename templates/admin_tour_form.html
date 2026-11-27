@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+        {{ 'Редактирование тура' if tour else 'Новый тур' }} — Каял
+    </title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<header class="catalog-header">
+    <a href="/" class="logo">КАЯЛ</a>
+    <nav class="navigation">
+        <a href="/admin">Панель администратора</a>
+        <a href="/tours">Каталог</a>
+    </nav>
+</header>
+
+<main class="admin-form-page">
+
+    <a href="/admin" class="back-link">← Назад к управлению</a>
+
+    <span class="section-subtitle">УПРАВЛЕНИЕ ТУРАМИ</span>
+
+    <h1>{{ 'Редактировать тур' if tour else 'Новый тур' }}</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="auth-alert {{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <form method="POST" class="admin-tour-form">
+        <input type="hidden" name="csrf_token"
+               value="{{ csrf_token() }}">
+
+        <label for="title">Название путешествия</label>
+        <input id="title" name="title" type="text"
+               maxlength="150" required
+               value="{{ request.form.get('title', tour.title if tour else '') }}">
+
+        <label for="category_id">Направление</label>
+        <select id="category_id" name="category_id" required>
+            {% set selected_category = request.form.get(
+                'category_id', tour.category_id if tour else 0
+            )|int %}
+            {% for category in categories %}
+                <option value="{{ category.id }}"
+                    {% if category.id == selected_category %}selected{% endif %}>
+                    {{ category.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label for="description">Описание</label>
+        <textarea id="description" name="description"
+                  rows="5" required>{{ request.form.get('description', tour.description if tour else '') }}</textarea>
+
+        <label for="location">Местоположение</label>
+        <input id="location" name="location" type="text"
+               maxlength="150" required
+               value="{{ request.form.get('location', tour.location if tour else '') }}">
+
+        <div class="admin-form-grid">
+            <div>
+                <label for="duration_days">Длительность (дней)</label>
+                <input id="duration_days" name="duration_days"
+                       type="number" min="1" required
+                       value="{{ request.form.get('duration_days', tour.duration_days if tour else 1) }}">
+            </div>
+            <div>
+                
+                <label for="price">Цена за человека (₽)</label>
+                <input id="price"
+                    name="price"
+                    type="number"
+                    min="0"
+                    max="99999999.99"
+                    step="0.01"
+                    required
+                    value="{{ request.form.get('price', tour.price if tour else '') | string | replace(',', '.') }}">
+
+            </div>
+        </div>
+
+        <label for="max_participants">Максимум участников</label>
+        <input id="max_participants" name="max_participants"
+               type="number" min="1" required
+               value="{{ request.form.get('max_participants', tour.max_participants if tour else 10) }}">
+
+        <label for="image">Фотография</label>
+        <input id="image" name="image" type="text"
+               placeholder="adventure.jpg"
+               value="{{ request.form.get('image', tour.image or '' if tour else '') }}">
+        <p class="form-help">
+            Укажите имя фотографии, которая уже находится в static/images.
+        </p>
+
+        <button type="submit" class="booking-submit">
+            {{ 'Сохранить изменения' if tour else 'Создать тур' }}
+        </button>
+    </form>
+
+    {% if tour %}
+    <section class="admin-dates-section">
+        <h2>Даты проведения</h2>
+
+        {% for item in dates %}
+            <div class="admin-date-row">
+                <span>
+                    {{ item.start_date.strftime('%d.%m.%Y') }}
+                    —
+                    {{ item.end_date.strftime('%d.%m.%Y') }}
+                </span>
+                <strong>Свободных мест: {{ item.available_places }}</strong>
+            </div>
+        {% else %}
+            <p>Даты пока не добавлены.</p>
+        {% endfor %}
+
+        <h2>Добавить дату</h2>
+
+        <form class="admin-tour-form" method="POST"
+              action="{{ url_for('admin_add_tour_date', tour_id=tour.id) }}">
+            <input type="hidden" name="csrf_token"
+                   value="{{ csrf_token() }}">
+
+            <label for="start_date">Дата начала</label>
+            <input type="date" id="start_date"
+                   name="start_date" required>
+
+            <label for="end_date">Дата окончания</label>
+            <input type="date" id="end_date"
+                   name="end_date" required>
+
+            <label for="available_places">Количество мест</label>
+            <input type="number" id="available_places"
+                   name="available_places" min="1"
+                   max="{{ tour.max_participants }}" required>
+
+            <button type="submit" class="booking-submit">
+                Добавить дату
+            </button>
+        </form>
+    </section>
+    {% endif %}
+
+</main>
+</body>
+</html>

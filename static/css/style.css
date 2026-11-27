@@ -1025,3 +1025,118 @@ a {
 .admin-btn.cancel:hover {
     background: #E8C9C0;
 }
+
+
+/* Управление турами */
+
+.admin-create-button {
+    display: inline-block;
+    background: var(--green);
+    color: white;
+    padding: 14px 22px;
+    margin-bottom: 22px;
+    font-size: 13px;
+}
+
+.admin-btn.edit {
+    display: inline-block;
+    background: #E7EDE6;
+    color: var(--green);
+    text-decoration: none;
+}
+
+.admin-form-page {
+    max-width: 850px;
+    margin: 0 auto;
+    padding: 65px 6% 100px;
+}
+
+.admin-form-page h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(38px, 5vw, 58px);
+    font-weight: 400;
+    margin: 18px 0 35px;
+}
+
+.admin-tour-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 35px;
+    background: white;
+    border: 1px solid #E8E2D9;
+}
+
+.admin-tour-form label {
+    margin-top: 12px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.admin-tour-form input,
+.admin-tour-form textarea,
+.admin-tour-form select {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #DED8CF;
+    background: white;
+    color: var(--green);
+    font-family: 'Manrope', sans-serif;
+    font-size: 13px;
+}
+
+.admin-tour-form textarea {
+    resize: vertical;
+}
+
+.admin-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.admin-form-grid > div {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.form-help {
+    font-size: 12px;
+    color: #788078;
+}
+
+.admin-dates-section {
+    margin-top: 55px;
+}
+
+.admin-dates-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px;
+    font-weight: 400;
+    margin: 28px 0 18px;
+}
+
+.admin-date-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    background: white;
+    padding: 18px;
+    border-bottom: 1px solid #E8E2D9;
+    font-size: 13px;
+}
+
+@media (max-width: 650px) {
+    .admin-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-tour-form {
+        padding: 22px;
+    }
+
+    .admin-date-row {
+        flex-direction: column;
+    }
+}
