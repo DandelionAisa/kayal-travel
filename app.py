@@ -189,6 +189,22 @@ def login_required(view):
     return wrapped
 
 
+# Проверка прав администратора
+def admin_required(view):
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        if g.user is None:
+            flash("Сначала войдите в аккаунт.", "error")
+            return redirect(url_for("login"))
+
+        if g.user["role"] != "admin":
+            abort(403)
+
+        return view(*args, **kwargs)
+
+    return wrapped
+
+
 # Регистрация
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -408,6 +424,139 @@ def book_tour(tour_id):
 
     finally:
         connection.close()
+
+
+# Административная панель
+@app.route("/admin")
+@admin_required
+def admin_dashboard():
+    connection = get_db_connection()
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT
+                    b.id,
+                    u.name AS client_name,
+                    u.email AS client_email,
+                    t.title AS tour_title,
+                    td.start_date,
+                    b.participants,
+                    b.total_price,
+                    b.status
+                FROM bookings b
+                JOIN users u ON b.user_id = u.id
+                JOIN tour_dates td ON b.tour_date_id = td.id
+                JOIN tours t ON td.tour_id = t.id
+                ORDER BY b.created_at DESC, b.id DESC
+            """)
+            bookings = cursor.fetchall()
+
+            cursor.execute("""
+                SELECT id, title, price, duration_days, is_active
+                FROM tours
+                ORDER BY id DESC
+            """)
+            tours = cursor.fetchall()
+
+    finally:
+        connection.close()
+
+    return render_template(
+        "admin.html",
+        bookings=bookings,
+        tours=tours
+    )
+
+
+@app.route("/admin/bookings/<int:booking_id>/<action>", methods=["POST"])
+@admin_required
+def update_booking(booking_id, action):
+    if action not in ("confirm", "cancel"):
+        abort(400)
+
+    connection = get_db_connection()
+
+    try:
+        connection.begin()
+
+        with connection.cursor() as cursor:
+            # Блокируем бронирование на время изменения
+            cursor.execute("""
+                SELECT id, tour_date_id, participants, status
+                FROM bookings
+                WHERE id = %s
+                FOR UPDATE
+            """, (booking_id,))
+
+            booking = cursor.fetchone()
+
+            if not booking:
+                connection.rollback()
+                abort(404)
+
+            if action == "confirm":
+                if booking["status"] != "pending":
+                    connection.rollback()
+                    flash("Подтвердить можно только новую заявку.", "error")
+                    return redirect(url_for("admin_dashboard"))
+
+                cursor.execute("""
+                    UPDATE bookings
+                    SET status = 'confirmed'
+                    WHERE id = %s
+                """, (booking_id,))
+
+                message = "Бронирование подтверждено."
+
+            else:
+                if booking["status"] == "cancelled":
+                    connection.rollback()
+                    flash("Заявка уже отменена.", "error")
+                    return redirect(url_for("admin_dashboard"))
+
+                # Оплаченную заявку не отменяем автоматически
+                cursor.execute("""
+                    SELECT status
+                    FROM payments
+                    WHERE booking_id = %s
+                    FOR UPDATE
+                """, (booking_id,))
+
+                payment = cursor.fetchone()
+
+                if payment and payment["status"] == "paid":
+                    connection.rollback()
+                    flash("Оплаченную заявку нельзя отменить здесь.", "error")
+                    return redirect(url_for("admin_dashboard"))
+
+                cursor.execute("""
+                    UPDATE bookings
+                    SET status = 'cancelled'
+                    WHERE id = %s
+                """, (booking_id,))
+
+                # Возвращаем свободные места
+                cursor.execute("""
+                    UPDATE tour_dates
+                    SET available_places = available_places + %s
+                    WHERE id = %s
+                """, (booking["participants"], booking["tour_date_id"]))
+
+                message = "Бронирование отменено. Места возвращены."
+
+        connection.commit()
+        flash(message, "success")
+
+    except Exception:
+        connection.rollback()
+        app.logger.exception("Ошибка изменения бронирования")
+        flash("Не удалось изменить бронирование.", "error")
+
+    finally:
+        connection.close()
+
+    return redirect(url_for("admin_dashboard"))
 
 
 if __name__ == "__main__":

@@ -913,3 +913,115 @@ a {
 .booking-submit:hover {
     background: var(--green-light);
 }
+
+
+
+/* Панель администратора */
+
+.admin-page {
+    max-width: 1350px;
+    padding: 75px 5% 120px;
+    margin: 0 auto;
+}
+
+.admin-page h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(40px, 5vw, 58px);
+    font-weight: 400;
+    margin: 15px 0;
+}
+
+.admin-intro {
+    color: #788078;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.admin-section {
+    margin-top: 55px;
+}
+
+.admin-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px;
+    font-weight: 400;
+    margin-bottom: 23px;
+}
+
+.admin-table-wrap {
+    overflow-x: auto;
+    background: white;
+    border: 1px solid #E8E2D9;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 13px;
+}
+
+.admin-table th {
+    background: var(--green);
+    color: white;
+    font-weight: 500;
+    padding: 18px;
+    white-space: nowrap;
+}
+
+.admin-table td {
+    padding: 18px;
+    border-bottom: 1px solid #EFEAE3;
+    vertical-align: middle;
+}
+
+.admin-table tbody tr:hover {
+    background: #F8F5F0;
+}
+
+.admin-table small {
+    display: block;
+    margin-top: 5px;
+    color: #788078;
+}
+
+@media (max-width: 650px) {
+    .admin-page {
+        padding: 50px 5%;
+    }
+
+    .admin-table {
+        min-width: 850px;
+    }
+}
+
+
+/* Управление бронированиями */
+
+.admin-btn {
+    border: none;
+    padding: 10px 15px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 11px;
+    cursor: pointer;
+    white-space: nowrap;
+    margin: 3px 0;
+}
+
+.admin-btn.confirm {
+    background: #DDEBDD;
+    color: #285A32;
+}
+
+.admin-btn.confirm:hover {
+    background: #C5DEC6;
+}
+
+.admin-btn.cancel {
+    background: #F1E0DB;
+    color: #8A4336;
+}
+
+.admin-btn.cancel:hover {
+    background: #E8C9C0;
+}
